@@ -1,6 +1,5 @@
 import pygame
 import time
-import threading
 from stepper import Stepper
 from cannon import Cannon
 
@@ -27,12 +26,15 @@ if __name__ == "__main__":
             # Process all pygame events to update joystick state
             pygame.event.get()
 
-            # Button states
-            button_pressed = joystick.get_button(5)  # Change button index if needed
-            if button_pressed:
-                # Start the fire function in a new thread if button pressed
-                fire_thread = threading.Thread(target=cannon.fire)
-                fire_thread.start()
+            rb_button_pressed = joystick.get_button(5)  # Change button index if needed
+            if rb_button_pressed:
+                cannon.fire()
+
+            right_stick_vertical = round(joystick.get_axis(4), 3)
+            if right_stick_vertical < -0.5:
+                stepper.step(10, "left")
+            elif right_stick_vertical > 0.5:
+                stepper.step(10, "right")
 
             # Small delay to avoid flooding output
             time.sleep(0.1)
@@ -42,3 +44,4 @@ if __name__ == "__main__":
     finally:
         # Proper cleanup for GPIO and pygame
         pygame.quit()
+        cannon.__del__()

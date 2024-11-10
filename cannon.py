@@ -17,6 +17,10 @@ class Cannon:
         GPIO.setup(self.relay_pin, GPIO.OUT, initial=GPIO.HIGH)
 
     def fire(self):
+        fire_thread = threading.Thread(target=self.fire_thread)
+        fire_thread.start()
+
+    def fire_thread(self):
         with self.lock:
             if self.is_firing:
                 return
@@ -33,19 +37,16 @@ class Cannon:
         # Reset firing state and start reload in a new thread
         with self.lock:
             self.is_firing = False
-        reload_thread = threading.Thread(target=self.reload)
-        reload_thread.start()
 
-    def reload(self):
-        with self.lock:
             if self.is_reloading:
                 return
             self.is_reloading = True
 
         print("Reloading...")
-        for i in range(self.reload_time):
-            self.time_until_ready = self.reload_time - i
+        for i in range(self.reload_time, 0, -1):
+            self.time_until_ready = i
             time.sleep(1)
+        self.time_until_ready = 0
         print("Reload complete")
 
         # Reset reloading state
