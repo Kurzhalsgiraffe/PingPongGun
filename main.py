@@ -21,6 +21,8 @@ if __name__ == "__main__":
     print(f"Number of Axes: {joystick.get_numaxes()}")
     print(f"Number of Buttons: {joystick.get_numbuttons()}")
 
+    last_movement_time = time.time()
+
     try:
         while True:
             # Process all pygame events to update joystick state
@@ -31,13 +33,31 @@ if __name__ == "__main__":
                 cannon.fire()
 
             right_stick_vertical = round(joystick.get_axis(4), 3)
-            if right_stick_vertical < -0.5:
-                stepper.step(10, "left")
-            elif right_stick_vertical > 0.5:
-                stepper.step(10, "right")
+
+            # If joystick is moved, step the motor and activate the relay
+            if abs(right_stick_vertical) > 0.5:
+                # Activate relay before moving the motor
+                relay_status = stepper.get_relay_status()
+                if relay_status == "inactive":
+                    stepper.activate_relay()
+
+                if right_stick_vertical < -0.5:
+                    stepper.step(10, "left")
+                elif right_stick_vertical > 0.5:
+                    stepper.step(10, "right")
+
+                # Reset the last movement time
+                last_movement_time = time.time()
+
+            # Check for idle time (no movement for 1 second)
+            if time.time() - last_movement_time > 1:
+                # If no movement for 1 second, deactivate relay
+                relay_status = stepper.get_relay_status()
+                if relay_status == "active":
+                    stepper.deactivate_relay()
 
             # Small delay to avoid flooding output
-            time.sleep(0.1)
+            time.sleep(0.01)
 
     except KeyboardInterrupt:
         print("\nProgram terminated.")
@@ -45,3 +65,4 @@ if __name__ == "__main__":
         # Proper cleanup for GPIO and pygame
         pygame.quit()
         cannon.__del__()
+        stepper.__del__()

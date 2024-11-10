@@ -1,6 +1,6 @@
 import threading
 import time
-import RPi.GPIO as GPIO
+import RPi.GPIO as GPIO #type:ignore
 
 class Cannon:
     def __init__(self, relay_pin):
