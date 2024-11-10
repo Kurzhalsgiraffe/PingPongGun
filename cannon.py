@@ -12,6 +12,8 @@ class Cannon:
         self.time_until_ready = self.reload_time
         self.lock = threading.Lock()
 
+        self.last_print_time = 0  # To prevent spam printing
+
         GPIO.setmode(GPIO.BOARD)
         GPIO.setwarnings(False)
         GPIO.setup(self.relay_pin, GPIO.OUT, initial=GPIO.HIGH)
@@ -25,11 +27,16 @@ class Cannon:
             if self.is_firing:
                 return
             if self.is_reloading:
-                print(f"System is currently reloading. ({self.time_until_ready} Seconds left)")
+                # Prevent spam print by checking the time
+                current_time = time.time()
+                if current_time - self.last_print_time >= 1:  # Only print once every second
+                    print(f"System is currently reloading. ({self.time_until_ready} Seconds left)")
+                    self.last_print_time = current_time
                 return
             self.is_firing = True
 
         # Fire sequence
+        print("Firing...")
         GPIO.output(self.relay_pin, GPIO.LOW)  # Active-low: Set LOW to turn relay on
         time.sleep(self.fire_time)
         GPIO.output(self.relay_pin, GPIO.HIGH)  # Set HIGH to turn relay off

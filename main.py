@@ -37,8 +37,8 @@ if __name__ == "__main__":
             # If joystick is moved, step the motor and activate the relay
             if abs(right_stick_vertical) > 0.5:
                 # Activate relay before moving the motor
-                relay_status = stepper.get_relay_status()
-                if relay_status == "inactive":
+                stepper_relay_status = stepper.get_relay_status()
+                if stepper_relay_status == "inactive":
                     stepper.activate_relay()
 
                 if right_stick_vertical < -0.5:
@@ -52,8 +52,8 @@ if __name__ == "__main__":
             # Check for idle time (no movement for 1 second)
             if time.time() - last_movement_time > 1:
                 # If no movement for 1 second, deactivate relay
-                relay_status = stepper.get_relay_status()
-                if relay_status == "active":
+                stepper_relay_status = stepper.get_relay_status()
+                if stepper_relay_status == "active":
                     stepper.deactivate_relay()
 
             # Small delay to avoid flooding output
