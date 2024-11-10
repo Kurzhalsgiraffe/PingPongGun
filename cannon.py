@@ -1,0 +1,58 @@
+import threading
+import time
+import RPi.GPIO as GPIO
+
+class Cannon:
+    def __init__(self, relay_pin):
+        self.relay_pin = relay_pin
+        self.is_firing = False
+        self.is_reloading = False
+        self.fire_time = 0.5
+        self.reload_time = 20
+        self.time_until_ready = self.reload_time
+        self.lock = threading.Lock()
+
+        GPIO.setmode(GPIO.BOARD)
+        GPIO.setwarnings(False)
+        GPIO.setup(self.relay_pin, GPIO.OUT, initial=GPIO.HIGH)
+
+    def fire(self):
+        with self.lock:
+            if self.is_firing:
+                return
+            if self.is_reloading:
+                print(f"System is currently reloading. ({self.time_until_ready} Seconds left)")
+                return
+            self.is_firing = True
+
+        # Fire sequence
+        GPIO.output(self.relay_pin, GPIO.LOW)  # Active-low: Set LOW to turn relay on
+        time.sleep(self.fire_time)
+        GPIO.output(self.relay_pin, GPIO.HIGH)  # Set HIGH to turn relay off
+
+        # Reset firing state and start reload in a new thread
+        with self.lock:
+            self.is_firing = False
+        reload_thread = threading.Thread(target=self.reload)
+        reload_thread.start()
+
+    def reload(self):
+        with self.lock:
+            if self.is_reloading:
+                return
+            self.is_reloading = True
+
+        print("Reloading...")
+        for i in range(self.reload_time):
+            self.time_until_ready = self.reload_time - i
+            time.sleep(1)
+        print("Reload complete")
+
+        # Reset reloading state
+        with self.lock:
+            self.is_reloading = False
+
+    def __del__(self):
+        """Destructor to clean up GPIO when the object is deleted."""
+        GPIO.cleanup()
+        print("GPIO cleanup done.")
