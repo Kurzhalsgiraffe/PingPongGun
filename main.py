@@ -42,9 +42,9 @@ if __name__ == "__main__":
                     stepper.activate_relay()
 
                 if right_stick_vertical < -0.5:
-                    stepper.step(10, "left")
+                    stepper.step(10, "left", 3*abs(right_stick_vertical))
                 elif right_stick_vertical > 0.5:
-                    stepper.step(10, "right")
+                    stepper.step(10, "right", 3*abs(right_stick_vertical))
 
                 # Reset the last movement time
                 last_movement_time = time.time()
