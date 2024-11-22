@@ -3,12 +3,13 @@ import time
 import RPi.GPIO as GPIO #type:ignore
 
 class Cannon:
-    def __init__(self, relay_pin):
-        self.relay_pin = relay_pin
+    def __init__(self, fire_relay_pin, reload_relay_pin):
+        self.fire_relay_pin = fire_relay_pin
+        self.reload_relay_pin = reload_relay_pin
         self.is_firing = False
         self.is_reloading = False
         self.fire_time = 0.5
-        self.reload_time = 20
+        self.reload_time = 15
         self.time_until_ready = self.reload_time
         self.lock = threading.Lock()
 
@@ -16,7 +17,8 @@ class Cannon:
 
         GPIO.setmode(GPIO.BOARD)
         GPIO.setwarnings(False)
-        GPIO.setup(self.relay_pin, GPIO.OUT, initial=GPIO.HIGH)
+        GPIO.setup(self.fire_relay_pin, GPIO.OUT, initial=GPIO.HIGH)
+        GPIO.setup(self.reload_relay_pin, GPIO.OUT, initial=GPIO.HIGH)
 
     def fire(self):
         fire_thread = threading.Thread(target=self.fire_thread)
@@ -37,9 +39,9 @@ class Cannon:
 
         # Fire sequence
         print("Firing...")
-        GPIO.output(self.relay_pin, GPIO.LOW)  # Active-low: Set LOW to turn relay on
+        GPIO.output(self.fire_relay_pin, GPIO.LOW)  # Active-low: Set LOW to turn relay on
         time.sleep(self.fire_time)
-        GPIO.output(self.relay_pin, GPIO.HIGH)  # Set HIGH to turn relay off
+        GPIO.output(self.fire_relay_pin, GPIO.HIGH)  # Set HIGH to turn relay off
 
         # Reset firing state and start reload in a new thread
         with self.lock:
@@ -50,10 +52,12 @@ class Cannon:
             self.is_reloading = True
 
         print("Reloading...")
+        GPIO.output(self.reload_relay_pin, GPIO.LOW)  # Active-low: Set LOW to turn relay on
         for i in range(self.reload_time, 0, -1):
             self.time_until_ready = i
             time.sleep(1)
         self.time_until_ready = 0
+        GPIO.output(self.reload_relay_pin, GPIO.HIGH)
         print("Reload complete")
 
         # Reset reloading state
