@@ -28,11 +28,11 @@ if __name__ == "__main__":
             # Process all pygame events to update joystick state
             pygame.event.get()
 
-            rb_button_pressed = joystick.get_button(5)  # Change button index if needed
+            rb_button_pressed = joystick.get_button(5)  # RB Button
             if rb_button_pressed:
                 cannon.fire()
 
-            right_stick_vertical = round(joystick.get_axis(4), 3)
+            right_stick_vertical = round(joystick.get_axis(3), 3)
 
             # If joystick is moved, step the motor and activate the relay
             if abs(right_stick_vertical) > 0.5:
@@ -62,7 +62,7 @@ if __name__ == "__main__":
     except KeyboardInterrupt:
         print("\nProgram terminated.")
     finally:
-        # Proper cleanup for GPIO and pygame
-        pygame.quit()
-        cannon.__del__()
-        stepper.__del__()
+        pygame.quit()  # Cleanup for Pygame
+        cannon.cleanup()  # Explicitly clean up Cannon GPIO
+        stepper.cleanup()  # Explicitly clean up Stepper GPIO
+        print("Cleanup complete.")

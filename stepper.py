@@ -1,3 +1,4 @@
+import atexit
 import time
 import RPi.GPIO as GPIO #type:ignore
 
@@ -26,7 +27,7 @@ class Stepper:
         self.deactivate_relay()
 
         print(f"Stepper initialized (step={self.stepPin}, direction={self.directionPin}, enable={self.enablePin})")
-        print("Lol")
+        atexit.register(self.cleanup)
 
     def activate_relay(self):
         """Activate relay to power the motor."""
@@ -67,7 +68,6 @@ class Stepper:
 
         GPIO.output(self.enablePin, True)
 
-    def __del__(self):
-        """Destructor to clean up GPIO when the object is deleted."""
+    def cleanup(self):
         GPIO.cleanup()
         print("GPIO cleanup done.")
