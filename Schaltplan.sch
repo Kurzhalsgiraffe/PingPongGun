@@ -8762,10 +8762,11 @@ Source: www.mpe-connector.de / garry_shortform_2012.pdf</description>
 </net>
 <net name="N$1" class="0">
 <segment>
-<pinref part="IC4" gate="IC" pin="OUT+"/>
 <pinref part="K4" gate="2" pin="S"/>
-<wire x1="106.68" y1="83.82" x2="170.18" y2="83.82" width="0.1524" layer="91"/>
-<wire x1="170.18" y1="83.82" x2="170.18" y2="40.64" width="0.1524" layer="91"/>
+<wire x1="170.18" y1="66.04" x2="170.18" y2="40.64" width="0.1524" layer="91"/>
+<pinref part="IC4" gate="IC" pin="OUT+"/>
+<wire x1="106.68" y1="83.82" x2="106.68" y2="66.04" width="0.1524" layer="91"/>
+<wire x1="106.68" y1="66.04" x2="170.18" y2="66.04" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="N$2" class="0">
